@@ -1,6 +1,0 @@
-Flask
-Flask_SQLAlchemy
-Flask-Bcrypt
-PyJWT
-psycopg2-binary
-python-dotenv
