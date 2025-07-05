@@ -1,8 +1,8 @@
-Flask==2.3.3
-psycopg2-binary
-SQLAlchemy==2.0.30
-pydantic
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0
+asyncpg
+alembic
 python-dotenv
 bcrypt
 PyJWT
-uvicorn

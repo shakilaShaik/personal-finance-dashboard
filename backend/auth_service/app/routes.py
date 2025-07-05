@@ -1,27 +1,41 @@
-from flask import Blueprint, request, jsonify
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
-from dbconnect import SessionLocal
+from dbconnect import AsyncSession
 from schemas import UserRegister
 from models import User
 from utils import hash_password
 
-router = Blueprint("auth", __name__)
-db = SessionLocal()
+router = APIRouter()
 
 
-@router.route("/register", methods=["POST"])
-def register():
-    data = UserRegister(**request.json)
-    existing_user = db.query(User).filter((User.email == data.email)).first()
+async def get_db():
+    async with async_session() as session:
+        yield session
+
+
+@router.post("/register")
+async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
+    stmt = select(User).where(User.email == user.email)
+    result = await db.execute(stmt)
+    existing_user = result.scalar_one_or_none()
+
     if existing_user:
-        return jsonify({"error": "user already exist , please login"})
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists, please login.",
+        )
+
     new_user = User(
-        name=data.name, email=data.email, password=hash_password(data.password)
+        name=user.name, email=user.email, password=hash_password(user.password)
     )
+
     try:
         db.add(new_user)
-        db.commit()
-        return jsonify({"msg": "User regisered successfully"}), 201
-    except:
-        db.rollback()
-        return jsonify({"error": "Failed to create user"}), 500
+        await db.commit()
+        return {"msg": "User registered successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create user.",
+        )

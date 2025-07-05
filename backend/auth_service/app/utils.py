@@ -1,4 +1,4 @@
-import bcrypt, jwt
+import bcrypt
 
 
 def hash_password(password: str) -> str:
