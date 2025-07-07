@@ -4,10 +4,6 @@ from app.dbconfig import settings
 
 Base = declarative_base()
 engine = create_async_engine(settings.DB_URL, echo=True)
-try:
 
-    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
-    print("connected to db successfully")
-except:
-    print("error while connecting to database")
+async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)

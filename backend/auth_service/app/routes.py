@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
-from app.dbconnect import AsyncSession
+from app.dbconnect import async_session
 from app.schemas import UserRegister
 from app.models import User
 from app.utils import hash_password
+from sqlalchemy import select
 
 router = APIRouter()
 
@@ -13,8 +14,13 @@ async def get_db():
         yield session
 
 
+@router.get("/")
+async def Hello():
+    return "Hello from get "
+
+
 @router.post("/register")
-async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
+async def register(user: UserRegister, db: async_session = Depends(get_db)):
     stmt = select(User).where(User.email == user.email)
     result = await db.execute(stmt)
     existing_user = result.scalar_one_or_none()
