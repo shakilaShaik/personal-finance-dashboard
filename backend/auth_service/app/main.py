@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from routes import router
-from models import Base
-from dbconnect import engine
+from app.routes import router
+from app.models import Base
+from app.dbconnect import engine
 from contextlib import asynccontextmanager
 
 
