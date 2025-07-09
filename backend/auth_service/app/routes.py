@@ -3,7 +3,14 @@ from sqlalchemy.exc import IntegrityError
 from app.dbconnect import async_session
 from app.schemas import UserRegister, UserLogin
 from app.models import User
-from app.utils import hash_password, verify_password, create_access_token
+from app.utils import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    decode_token,
+    create_refresh_token,
+)
+
 from sqlalchemy import select
 
 
@@ -63,9 +70,18 @@ async def login(user: UserLogin, db: async_session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=" incorrect password"
         )
-    token = create_access_token({"user_id": db_user.id})
+    acess_token = create_access_token({"user_id": db_user.id})
+    refresh_token = create_refresh_token({"user_id": db_user.id})
     return {
         "access_token": token,
         "token_type": "bearer",
         "message": "Login successful",
     }
+
+
+@router.post("/verify-token")
+async def verify_token(token: str):
+    payload = decode_token(token)
+    if payload:
+        return {"user_id": payload["user_id"]}
+    raise HTTPException(status_code=401, detail="Invalid or expired token")
