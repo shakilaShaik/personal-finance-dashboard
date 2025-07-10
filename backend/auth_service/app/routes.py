@@ -3,6 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from app.dbconnect import async_session
 from app.schemas import UserRegister, UserLogin
 from app.models import User
+from fastapi import Response, Request
+from fastapi.responses import JSONResponse
 from app.utils import (
     hash_password,
     verify_password,
@@ -70,13 +72,13 @@ async def login(user: UserLogin, db: async_session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=" incorrect password"
         )
-    acess_token = create_access_token({"user_id": db_user.id})
+    access_token = create_access_token({"user_id": db_user.id})
     refresh_token = create_refresh_token({"user_id": db_user.id})
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "message": "Login successful",
-    }
+
+    response = JSONResponse(content={"msg": "Login succcessful"})
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    return response
 
 
 @router.post("/verify-token")
@@ -85,3 +87,18 @@ async def verify_token(token: str):
     if payload:
         return {"user_id": payload["user_id"]}
     raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+
+@router.post("/refresh-token")
+async def refresh_token(request: Request, response: Response):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Refresh token missing")
+
+    payload = decode_token(refresh_token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+
+    new_access_token = create_access_token({"user_id": payload["user_id"]})
+    response.set_cookie(key="access_token", value=new_access_token, httponly=True)
+    return {"message": "Token refreshed successfully"}
