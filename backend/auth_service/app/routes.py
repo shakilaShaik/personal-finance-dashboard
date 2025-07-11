@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from app.dbconnect import async_session
-from app.schemas import UserRegister, UserLogin
+from app.schemas import UserRegister, UserLogin, ForgotUser
 from app.models import User
 from fastapi import Response, Request
 from fastapi.responses import JSONResponse
@@ -113,7 +113,15 @@ async def get_current_user(request: Request):
     if not login_token:
         raise HTTPException(status_code=401, detail="You must login")
     try:
-        login_user = decode_token(login_token)
+        payload = decode_token(login_token)
+        login_user = payload.get("user_id")
+
     except:
         raise HTTPException(status_code=400, detail="not found")
     return login_user
+
+@router.post('/forgot-password')
+async def get_update_password(request:Request):
+    forgot_user= request.body(name:ForgotUSer)
+
+
