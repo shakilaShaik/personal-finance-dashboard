@@ -77,6 +77,7 @@ async def login(user: UserLogin, db: async_session = Depends(get_db)):
 
     response = JSONResponse(content={"msg": "Login succcessful"})
     response.set_cookie(key="access_token", value=access_token, httponly=True)
+    print(access_token)
     response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
     return response
 
@@ -93,12 +94,26 @@ async def verify_token(token: str):
 async def refresh_token(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
-        raise HTTPException(status_code=401, detail="Refresh token missing")
+        raise HTTPException(status_code=401, detail="you are unauthorised")
 
     payload = decode_token(refresh_token)
     if not payload:
-        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+        raise HTTPException(
+            status_code=401, detail="Session expired , you have to login"
+        )
 
     new_access_token = create_access_token({"user_id": payload["user_id"]})
     response.set_cookie(key="access_token", value=new_access_token, httponly=True)
-    return {"message": "Token refreshed successfully"}
+    return {"message": "access_Token refreshed successfully"}
+
+
+@router.get("/get-user")
+async def get_current_user(request: Request):
+    login_token = request.cookies.get("access_token")
+    if not login_token:
+        raise HTTPException(status_code=401, detail="You must login")
+    try:
+        login_user = decode_token(login_token)
+    except:
+        raise HTTPException(status_code=400, detail="not found")
+    return login_user
