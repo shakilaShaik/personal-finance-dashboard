@@ -1,27 +1,62 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   auth_service:
-    build: ./auth_service
+    build:
+      context: ./auth_service
     container_name: auth_service
+    command: ["/app/entrypoint.sh"]
     ports:
-      - "5000:5000"
-    env_file:
-      - .env
+      - "8000:8000"
+    environment:
+      - DB_URL=postgresql+psycopg2://postgres:postgres@auth_db:5432/auth_db
+      - SECRET_KEY=your_secret_key
     depends_on:
-      - postgres
+      - auth_db
+    volumes:
+      - ./auth_service:/app
+
+  auth_db:
+    image: postgres:15
+    container_name: auth_db
+    restart: always
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  analytics_service:
+    build:
+      context: ./analytics_service
+    container_name: analytics_service
+    command: ["/app/entrypoint.sh"]
+    ports:
+      - "8001:8000"
+    environment:
+      - DB_URL=postgresql+asyncpg://postgres:postgres@analytics_db:5432/analytics_db
+      - SECRET_KEY=your_secret_key
+    depends_on:
+      - analytics_db
+    volumes:
+      - ./analytics_service:/app
+
+  analytics_db:
+    image: postgres:15
+    container_name: analytics_db
+    restart: always
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - analytics_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
 
 volumes:
-  pgdata:
+  auth_pgdata:
+  analytics_pgdata:
