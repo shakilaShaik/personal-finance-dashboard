@@ -120,8 +120,7 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=400, detail="not found")
     return login_user
 
-@router.post('/forgot-password')
-async def get_update_password(request:Request):
-    forgot_user= request.body(name:ForgotUSer)
 
-
+# @router.post('/forgot-password')
+# async def get_update_password(request:Request):
+#     forgot_user= request.body(name:ForgotUSer)
