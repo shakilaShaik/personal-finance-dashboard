@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Numeric, Date, String
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from app.dbconnet import Base
+from backend.analytics_service.app.dbconnect import Base
 
 
 class DailyLog(Base):

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from backend.analytics_service.app.dbconnect import async_session
+from app.dbconnect import async_session
 from app.models import DailyLog
 from app.schemas import DailyLogCreate
 from app.utils import get_user_id_from_token
@@ -13,3 +13,30 @@ router = APIRouter()
 async def get_db():
     async with async_session as session:
         yield session
+
+
+@router.post("/log")
+async def create_daily_log(
+    payload: DailyLogCreate, request: Request, db: AsyncSession = Depends(get_db)
+):
+    user_id = get_user_id_from_token(request)
+
+    stmt = select(DailyLog).where(
+        DailyLog.user_id == user_id, DailyLog.log_date == payload.log_date
+    )
+    existing_log = (await db.execute(stmt)).scalar_one_or_none
+    if existing_log:
+        raise HTTPException(status_code=400, detail="log already exists, Update it")
+    new_log = DailyLog(
+        user_id=user_id,
+        log_date=payload.log_date,
+        income=payload.income,
+        food=payload.food,
+        travel=payload.travel,
+        shopping=payload.shopping,
+        daily_needs=payload.daily_needs,
+        others=payload.others,
+    )
+    db.add(new_log)
+    await db.commit()
+    return {"msg": "Today log created successfully"}
