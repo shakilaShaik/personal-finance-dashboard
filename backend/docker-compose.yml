@@ -5,19 +5,18 @@ services:
     build:
       context: ./auth_service
     container_name: auth_service
-    command: ["/app/entrypoint.sh"]
     ports:
       - "8000:8000"
     environment:
-      - DB_URL=postgresql+psycopg2://postgres:postgres@auth_db:5432/auth_db
-      - SECRET_KEY=your_secret_key
+      - DB_URL=postgresql+psycopg2://postgres:auth_db@auth_db:5432/auth_db
+      - SECRET_KEY=supersecretkey
     depends_on:
       - auth_db
     volumes:
       - ./auth_service:/app
 
   auth_db:
-    image: postgres:15
+    image: postgres:17
     container_name: auth_db
     restart: always
     environment:
@@ -33,12 +32,11 @@ services:
     build:
       context: ./analytics_service
     container_name: analytics_service
-    command: ["/app/entrypoint.sh"]
     ports:
       - "8001:8000"
     environment:
-      - DB_URL=postgresql+asyncpg://postgres:postgres@analytics_db:5432/analytics_db
-      - SECRET_KEY=your_secret_key
+      - DB_URL=postgresql+asyncpg://postgres:analytics_db@analytics_db:5432/analytics_db
+      - SECRET_KEY=shammu1234
     depends_on:
       - analytics_db
     volumes:

@@ -28,9 +28,12 @@ target_metadata = None
 
 from sqlalchemy import create_engine
 from app.models import Base
-from app.dbconfig import settings
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = settings.DB_URL.replace("asyncpg", "psycopg2")
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 
