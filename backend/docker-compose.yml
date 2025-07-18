@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_URL=postgresql+psycopg2://postgres:auth_db@auth_db:5432/auth_db
+      - DB_URL=postgresql+psycopg2://auth_db:postgres@auth_db:5432/auth_db
       - SECRET_KEY=supersecretkey
     depends_on:
       - auth_db
@@ -16,12 +16,12 @@ services:
       - ./auth_service:/app
 
   auth_db:
-    image: postgres:17
+    image: postgres:16 # ✅ changed from 17 to 16
     container_name: auth_db
     restart: always
     environment:
       POSTGRES_DB: auth_db
-      POSTGRES_USER: postgres
+      POSTGRES_USER: auth_db
       POSTGRES_PASSWORD: postgres
     volumes:
       - auth_pgdata:/var/lib/postgresql/data
@@ -35,7 +35,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - DB_URL=postgresql+asyncpg://postgres:analytics_db@analytics_db:5432/analytics_db
+      - DB_URL=postgresql+asyncpg://analytics_db:postgres@analytics_db:5432/analytics_db
       - SECRET_KEY=shammu1234
     depends_on:
       - analytics_db
@@ -48,7 +48,7 @@ services:
     restart: always
     environment:
       POSTGRES_DB: analytics_db
-      POSTGRES_USER: postgres
+      POSTGRES_USER: analytics_db
       POSTGRES_PASSWORD: postgres
     volumes:
       - analytics_pgdata:/var/lib/postgresql/data
