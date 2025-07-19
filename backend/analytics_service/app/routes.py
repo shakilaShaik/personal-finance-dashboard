@@ -24,19 +24,12 @@ async def create_daily_log(
     stmt = select(DailyLog).where(
         DailyLog.user_id == user_id, DailyLog.log_date == payload.log_date
     )
-    existing_log = (await db.execute(stmt)).scalar_one_or_none
+    existing_log = (await db.execute(stmt)).scalar_one_or_none()
+
     if existing_log:
-        raise HTTPException(status_code=400, detail="log already exists, Update it")
-    new_log = DailyLog(
-        user_id=user_id,
-        log_date=payload.log_date,
-        income=payload.income,
-        food=payload.food,
-        travel=payload.travel,
-        shopping=payload.shopping,
-        daily_needs=payload.daily_needs,
-        others=payload.others,
-    )
+        raise HTTPException(status_code=400, detail="Log already exists, update it.")
+
+    new_log = DailyLog(user_id=user_id, **payload.dict())
     db.add(new_log)
     await db.commit()
-    return {"msg": "Today log created successfully"}
+    return {"msg": "Today's log created successfully"}

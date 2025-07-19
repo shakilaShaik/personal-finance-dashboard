@@ -14,7 +14,7 @@ from app.utils import (
 )
 
 from sqlalchemy import select
-
+from deps import get_current_user
 
 router = APIRouter()
 
@@ -63,23 +63,17 @@ async def login(user: UserLogin, db: async_session = Depends(get_db)):
     result = await db.execute(stmt)
     db_user = result.scalar_one_or_none()
 
-    if not db_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found , please register",
-        )
-    if not verify_password(user.password, db_user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=" incorrect password"
-        )
+    if not db_user or not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
     access_token = create_access_token({"user_id": db_user.id})
     refresh_token = create_refresh_token({"user_id": db_user.id})
 
-    response = JSONResponse(content={"msg": "Login succcessful"})
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    print(access_token)
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
-    return response
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @router.post("/verify-token")
@@ -108,17 +102,8 @@ async def refresh_token(request: Request, response: Response):
 
 
 @router.get("/get-user")
-async def get_current_user(request: Request):
-    login_token = request.cookies.get("access_token")
-    if not login_token:
-        raise HTTPException(status_code=401, detail="You must login")
-    try:
-        payload = decode_token(login_token)
-        login_user = payload.get("user_id")
-
-    except:
-        raise HTTPException(status_code=400, detail="not found")
-    return login_user
+async def get_user(current_user: dict = Depends(get_current_user)):
+    return {"message": "User retrieved", "user_id": current_user["user_id"]}
 
 
 # @router.post('/forgot-password')

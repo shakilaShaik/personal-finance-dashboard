@@ -9,3 +9,4 @@ PyJWT
 psycopg2-binary
 email-validator
 asyncpg
+jose
