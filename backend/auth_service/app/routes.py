@@ -14,7 +14,7 @@ from app.utils import (
 )
 
 from sqlalchemy import select
-from deps import get_current_user
+from app.deps import get_current_user
 
 router = APIRouter()
 
