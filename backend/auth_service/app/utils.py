@@ -5,7 +5,9 @@ import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 
 SECRET_KEY = settings.SECRET_KEY
+print("super secret key from auth-service", SECRET_KEY)
 ALGORITHM = "HS256"
+print("algo from auth", ALGORITHM)
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
@@ -23,7 +25,7 @@ def create_access_token(data: dict, expires_minutes=30):
     expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
     to_encode.update({"exp": expire})
     access_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
-    print(access_token)
+    print("access_token is -------", access_token)
     return access_token
 
 
@@ -36,6 +38,7 @@ def create_refresh_token(data: dict):
 
 def decode_token(token: str):
     try:
+        print("token from auth service to decode", token)
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         print("the decoded token was========", payload)
         return payload

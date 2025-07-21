@@ -4,8 +4,9 @@ from sqlalchemy import select
 from app.dbconnect import async_session
 from app.models import DailyLog
 from app.schemas import DailyLogCreate
-from app.utils import get_user_id_from_token
 
+
+from app.deps import get_current_user
 
 router = APIRouter()
 
@@ -17,12 +18,14 @@ async def get_db():
 
 @router.post("/log")
 async def create_daily_log(
-    payload: DailyLogCreate, request: Request, db: AsyncSession = Depends(get_db)
+    payload: DailyLogCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),  # ✅ use Depends here
 ):
-    user_id = get_user_id_from_token(request)
+    user_id = current_user["user_id"]
 
     stmt = select(DailyLog).where(
-        DailyLog.user_id == user_id, DailyLog.log_date == payload.log_date
+        DailyLog.user_id == user_id, DailyLog.log_date == payload.date
     )
     existing_log = (await db.execute(stmt)).scalar_one_or_none()
 

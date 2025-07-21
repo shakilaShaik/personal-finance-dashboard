@@ -6,7 +6,7 @@ services:
       context: ./auth_service
     container_name: auth_service
     ports:
-      - "8000:8000"
+      - "8002:8000"
     environment:
       - DB_URL=postgresql+psycopg2://auth_db:postgres@auth_db:5432/auth_db
       - SECRET_KEY=supersecretkey
@@ -33,10 +33,10 @@ services:
       context: ./analytics_service
     container_name: analytics_service
     ports:
-      - "8001:8000"
+      - "8003:8000"
     environment:
       - DB_URL=postgresql+asyncpg://analytics_db:postgres@analytics_db:5432/analytics_db
-      - SECRET_KEY=shammu1234
+
     depends_on:
       - analytics_db
     volumes:
