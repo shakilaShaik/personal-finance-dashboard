@@ -7,7 +7,7 @@ from app.dbconnect import Base
 class DailyLog(Base):
     __tablename__ = "daily_logs"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), nullable=False)
+    user_id = Column(Integer, nullable=False)
     log_date = Column(Date, nullable=False)
     food = Column(Numeric, default=0)
     travel = Column(Numeric, default=0)

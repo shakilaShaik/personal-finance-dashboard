@@ -4,18 +4,13 @@ from uuid import UUID
 
 
 class DailyLogCreate(BaseModel):
-    date: date
-    income: float
-    food: float
-    travel: float
-    shopping: float
-    daily_needs: float
-    other: float
-
-
-class DailyLogResponse(DailyLogCreate):
-    id: int
-    user_id: UUID
+    log_date: date
+    income: float = 0
+    food: float = 0
+    travel: float = 0
+    shopping: float = 0
+    daily_needs: float = 0
+    other: float = 0
 
 
 class config:

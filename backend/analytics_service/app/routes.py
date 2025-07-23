@@ -25,7 +25,7 @@ async def create_daily_log(
     user_id = current_user["user_id"]
 
     stmt = select(DailyLog).where(
-        DailyLog.user_id == user_id, DailyLog.log_date == payload.date
+        DailyLog.user_id == user_id, DailyLog.log_date == payload.log_date
     )
     existing_log = (await db.execute(stmt)).scalar_one_or_none()
 
@@ -35,4 +35,5 @@ async def create_daily_log(
     new_log = DailyLog(user_id=user_id, **payload.dict())
     db.add(new_log)
     await db.commit()
+    print("log is +++++++++++++++", new_log)
     return {"msg": "Today's log created successfully"}
