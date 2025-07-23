@@ -37,3 +37,26 @@ async def create_daily_log(
     await db.commit()
     print("log is +++++++++++++++", new_log)
     return {"msg": "Today's log created successfully"}
+
+
+@router.put("/update-log")
+async def update_log(
+    data: DailyLogCreate,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+
+    current_user_id = user["user_id"]
+    statement = select(DailyLog).where(
+        DailyLog.log_date == data.log_date, DailyLog.user_id == current_user_id
+    )
+
+    exist_log = (await db.execute(statement)).scalar_one_or_none
+    if exist_log:
+        update_data = data.dict(exclude_unset=True, exclude={"log_date"})
+        for field, value in update_data.items():
+            setattr(exist_log, field, value)
+
+        await db.commit()
+        await db.refresh(exist_log)
+        return {"msg": "updated your expenditure log"}
