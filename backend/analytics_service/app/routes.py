@@ -51,7 +51,7 @@ async def update_log(
         DailyLog.log_date == data.log_date, DailyLog.user_id == current_user_id
     )
 
-    exist_log = (await db.execute(statement)).scalar_one_or_none
+    exist_log = (await db.execute(statement)).scalar_one_or_none()
     if exist_log:
         update_data = data.dict(exclude_unset=True, exclude={"log_date"})
         for field, value in update_data.items():
