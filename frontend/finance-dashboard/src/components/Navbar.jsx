@@ -13,7 +13,7 @@ const Navbar = () => {
     { name: "Sign Up", path: "/signup" },
   ];
 
-  const toggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
+  const mobileToggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -43,7 +43,7 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button onClick={toggleMenu} aria-label="Toggle menu">
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            {mobileToggleMenu ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </nav>

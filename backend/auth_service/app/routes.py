@@ -30,7 +30,7 @@ async def Hello():
 
 
 @router.post("/register")
-async def register(user: UserRegister, db: async_session = Depends(get_db)):
+async def register(user: UserRegister, db=Depends(get_db)):
     stmt = select(User).where(User.email == user.email)
     result = await db.execute(stmt)
     existing_user = result.scalar_one_or_none()
@@ -58,7 +58,7 @@ async def register(user: UserRegister, db: async_session = Depends(get_db)):
 
 
 @router.post("/login")
-async def login(user: UserLogin, db: async_session = Depends(get_db)):
+async def login(user: UserLogin, db=Depends(get_db)):
     stmt = select(User).where(User.email == user.email)
     result = await db.execute(stmt)
     db_user = result.scalar_one_or_none()
