@@ -57,8 +57,8 @@ async def register(user: UserRegister, db=Depends(get_db)):
         )
 
 
-@router.post("/login")
-async def login(user: UserLogin, db=Depends(get_db)):
+@router.post("/login", status_code=200)
+async def login(user: UserLogin, response: Response, db=Depends(get_db)):
     stmt = select(User).where(User.email == user.email)
     result = await db.execute(stmt)
     db_user = result.scalar_one_or_none()
@@ -68,12 +68,15 @@ async def login(user: UserLogin, db=Depends(get_db)):
 
     access_token = create_access_token({"user_id": db_user.id})
     refresh_token = create_refresh_token({"user_id": db_user.id})
+    response.set_cookie({"access_token": access_token, "refresh_token": refresh_token})
+    response.set_cookie(
+        httponly=True, key="access_token", value=access_token, secure=True
+    )
+    response.set_cookie(
+        httponly=True, key="refresh_token", value=refresh_token, secure=True
+    )
 
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+    return {"msg": "user registered successfully"}
 
 
 @router.post("/verify-token")

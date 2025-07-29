@@ -34,7 +34,7 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${baseUrl}/register`, formData);
+      const response = await axios.post(`${baseUrl}/auth/register`, formData);
       if (response.status === 200 || response.status === 201) {
         navigate("/signin");
       }
