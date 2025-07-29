@@ -16,7 +16,7 @@ from app.utils import (
 from sqlalchemy import select
 from app.deps import get_current_user
 
-router = APIRouter()
+router = APIRouter(prefix="/auth")
 
 
 async def get_db():

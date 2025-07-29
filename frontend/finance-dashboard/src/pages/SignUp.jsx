@@ -12,8 +12,7 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:8002";
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8002";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,7 +34,7 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${baseUrl}/auth/register`, formData);
+      const response = await axios.post(`${baseUrl}/register`, formData);
       if (response.status === 200 || response.status === 201) {
         navigate("/signin");
       }
