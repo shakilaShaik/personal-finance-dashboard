@@ -68,7 +68,7 @@ async def login(user: UserLogin, response: Response, db=Depends(get_db)):
 
     access_token = create_access_token({"user_id": db_user.id})
     refresh_token = create_refresh_token({"user_id": db_user.id})
-    response.set_cookie({"access_token": access_token, "refresh_token": refresh_token})
+
     response.set_cookie(
         httponly=True, key="access_token", value=access_token, secure=True
     )
