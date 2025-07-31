@@ -1,7 +1,35 @@
 // src/pages/Home.jsx
+import axios from "axios";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { setLogin } from "../redux/userSlice";
 
+import { baseUrl_auth } from "../api/apiCall";
+import { api } from "../api/interceptor";
 const Home = () => {
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  console.log("user", user);
+  const handleFetchUSer = async () => {
+    try {
+      const res = await api.request({
+        url: `${baseUrl_auth}/auth/get-user`,
+        method: "GET",
+        withCredentials: true,
+      });
+
+      console.log("result from get user", res);
+      dispatch(setLogin(res));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    handleFetchUSer();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center text-center px-4 py-12">
       <h2 className="text-4xl font-bold text-teal-700 mb-6">
@@ -24,6 +52,8 @@ const Home = () => {
         >
           Sign In
         </Link>
+
+        <input type="date" name="date" className="bg-red-500" />
       </div>
     </div>
   );

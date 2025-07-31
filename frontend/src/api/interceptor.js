@@ -1,11 +1,8 @@
 // src/common/api.js
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8002"; // Change as needed
-
-// Create Axios instance
+// Create Axios instance without a fixed baseURL
 export const api = axios.create({
-    baseURL: BASE_URL,
     withCredentials: true,
 });
 
@@ -22,7 +19,6 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // If unauthorized and not already retried
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
@@ -31,19 +27,18 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // Attempt to refresh token
-                await axios.post(`${BASE_URL}/refresh-token`, null, {
+                // Important: Use the refresh endpoint on the auth service
+                await axios.post("http://localhost:8002/auth/refresh-token", null, {
                     withCredentials: true,
                 });
 
-                // Retry original request with new token
                 const newToken = localStorage.getItem("access_token");
                 if (newToken) {
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 }
+
                 return api(originalRequest);
-            } catch {
-                // Refresh failed, redirect to login
+            } catch (err) {
                 window.location.href = "/signin";
             }
         }

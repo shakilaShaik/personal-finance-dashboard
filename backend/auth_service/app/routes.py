@@ -4,7 +4,7 @@ from app.dbconnect import async_session
 from app.schemas import UserRegister, UserLogin, ForgotUser
 from app.models import User
 from fastapi import Response, Request
-from fastapi.responses import JSONResponse
+from fastapi import Cookie
 from app.utils import (
     hash_password,
     verify_password,
@@ -76,7 +76,11 @@ async def login(user: UserLogin, response: Response, db=Depends(get_db)):
         httponly=True, key="refresh_token", value=refresh_token, secure=True
     )
 
-    return {"msg": "user registered successfully"}
+    return {
+        "msg": "user login successfully",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
 
 
 @router.post("/verify-token")
@@ -107,6 +111,21 @@ async def refresh_token(request: Request, response: Response):
 @router.get("/get-user")
 async def get_user(current_user: dict = Depends(get_current_user)):
     return {"message": "User retrieved", "user_id": current_user["user_id"]}
+
+
+from fastapi import APIRouter, Response, Request
+
+router = APIRouter()
+
+
+@router.get("/logout")
+async def logout(request: Request, response: Response):
+    # Clear cookies or session data here if needed
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    # Example
+    return {"message": "Logged out successfully"}
 
 
 # @router.post('/forgot-password')
