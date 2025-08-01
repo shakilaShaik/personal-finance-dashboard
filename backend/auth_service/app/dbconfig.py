@@ -1,5 +1,3 @@
-# config variables for the database imported from the env file
-
 import os
 from dotenv import load_dotenv
 
@@ -12,6 +10,9 @@ class Settings:
         f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
     )
     SECRET_KEY = os.getenv("SECRET_KEY")
+    ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 15
+    REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
 settings = Settings()

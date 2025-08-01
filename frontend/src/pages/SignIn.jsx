@@ -26,6 +26,7 @@ const Login = () => {
         withCredentials: true,
       });
       console.log("login successful", res);
+      localStorage.setItem("access_token", res.data.access_token);
 
       toast.success("Login successful!"); // ✅ proper toast usage
       navigate("/home"); // ✅ redirect after success (optional)
