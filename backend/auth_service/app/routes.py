@@ -12,6 +12,7 @@ from app.utils import (
     decode_token,
     create_refresh_token,
 )
+from fastapi import APIRouter, Response, Request
 
 from sqlalchemy import select
 from app.deps import get_current_user
@@ -111,11 +112,6 @@ async def refresh_token(request: Request, response: Response):
 @router.get("/get-user")
 async def get_user(current_user: dict = Depends(get_current_user)):
     return {"message": "User retrieved", "user_id": current_user["user_id"]}
-
-
-from fastapi import APIRouter, Response, Request
-
-router = APIRouter()
 
 
 @router.get("/logout")
