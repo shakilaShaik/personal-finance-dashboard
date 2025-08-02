@@ -133,13 +133,7 @@ async def refresh_token(
         await db.commit()
 
         # Set new cookies
-        response.set_cookie(
-            key="access_token",
-            value=new_access_token,
-            httponly=True,
-            secure=True,
-            samesite="lax",
-        )
+       
         response.set_cookie(
             key="refresh_token",
             value=new_refresh_token,
@@ -150,7 +144,7 @@ async def refresh_token(
 
         return {
             "access_token": new_access_token,
-            "refresh_token": new_refresh_token,
+      
             "token_type": "bearer",
         }
 

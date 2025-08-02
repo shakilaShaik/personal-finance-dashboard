@@ -7,7 +7,7 @@ const Login = () => {
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const baseUrl = "http://localhost:8002";
+  const BASE_URL = "http://localhost:8002";
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -17,10 +17,10 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      console.log("url is ", `${baseUrl}/auth/login`);
+      console.log("url is ", `${BASE_URL}/auth/login`);
 
       const res = await axios({
-        url: `${baseUrl}/auth/login`,
+        url: `${BASE_URL}/auth/login`,
         method: "POST", // ✅ string, not a variable
         data: formData, // ✅ send credentials in request body
         withCredentials: true,

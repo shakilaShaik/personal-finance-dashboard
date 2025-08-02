@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setLogin } from "../redux/userSlice";
 import { toast } from "react-toastify";
-import api from "../api/interceptor.js";
+import   authAxios  from '../api/interceptor'
 import { Link } from "react-router-dom";
+// import SideBar from '../components/SideBar'
 
 const Home = () => {
   const { user } = useSelector((state) => state.user);
@@ -12,7 +13,10 @@ const Home = () => {
 
   const handleFetchUser = async () => {
     try {
-      const res = await api.get("/auth/me");
+      console.log("the url is interceptor url", authAxios.baseURL);
+      
+      const res = await authAxios.get("/auth/me");
+
 
       dispatch(setLogin(res.data));
     } catch (error) {
@@ -20,9 +24,9 @@ const Home = () => {
       toast.error(error.response?.data?.message || "Failed to fetch user data");
 
       // If unauthorized and interceptor didn't handle it
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 ) {
         localStorage.removeItem("access_token");
-        window.location.href = "/signin";
+       
       }
     }
   };
@@ -36,6 +40,7 @@ const Home = () => {
       {user ? (
         <>
           <h1>Hii {user.name}</h1>
+          {/* <SideBar/> */}
         </>
       ) : (
         <>

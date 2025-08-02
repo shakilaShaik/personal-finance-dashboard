@@ -8,7 +8,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: "Home", path: "/" },
+    { name: "Home", path: "/home" },
     { name: "Sign In", path: "/signin" },
     { name: "Sign Up", path: "/signup" },
   ];
@@ -18,7 +18,7 @@ const Navbar = () => {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold text-teal-600">
+        <Link to="/home" className="text-2xl font-bold text-teal-600">
           FinTrack
         </Link>
 
