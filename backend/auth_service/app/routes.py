@@ -80,6 +80,7 @@ async def login(
         secure=True,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        expires=(datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)).strftime("%a, %d-%b-%Y %H:%M:%S GMT"),
     )
 
     return {

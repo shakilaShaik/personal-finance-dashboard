@@ -7,6 +7,8 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import AddLog from "./components/AddLog";
+import ShowLog from "./components/ShowLog";
 
 function App() {
   return (
@@ -18,6 +20,9 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/add-log" element={<AddLog/>} />
+            <Route  path="/show-log" element={<ShowLog/>}/>
+            <Route />
           </Routes>
         </main>
         <Footer />
