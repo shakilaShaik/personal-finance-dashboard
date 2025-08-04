@@ -13,6 +13,8 @@ from app.utils import (
 )
 from app.deps import get_current_user, get_db
 from app.dbconfig import settings
+expires = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -80,7 +82,7 @@ async def login(
         secure=True,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        expires=(datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)).strftime("%a, %d-%b-%Y %H:%M:%S GMT"),
+        expires=expires,
     )
 
     return {
@@ -145,7 +147,6 @@ async def refresh_token(
 
         return {
             "access_token": new_access_token,
-      
             "token_type": "bearer",
         }
 

@@ -1,57 +1,47 @@
-import { NavLink } from 'react-router-dom';
-import { 
-  FiPlusCircle, 
-  FiList, 
-  FiPieChart, 
-  FiDollarSign,
-  FiSettings,
-  FiLogOut
-} from 'react-icons/fi';
+import { NavLink } from "react-router-dom";
+import { PlusCircle, List, BarChart3 } from "lucide-react";
 
-const Sidebar = () => {
-  const navItems = [
-    { path: "/add-expense", icon: <FiPlusCircle size={20} />, label: "Add Expense" },
-    { path: "/expenses", icon: <FiList size={20} />, label: "Expense Log" },
-    { path: "/analytics", icon: <FiPieChart size={20} />, label: "Analytics" },
-    { path: "/settings", icon: <FiSettings size={20} />, label: "Settings" },
-  ];
-
+export default function Sidebar() {
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
-      {/* Logo/Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-indigo-600">FinanceDash</h1>
-      </div>
+    <div className="w-64 h-screen bg-white border-r border-gray-200 p-6 shadow-md ">
+      <h1 className="text-2xl font-bold mb-10 text-gray-800 tracking-wide text-center">
+        📊 FinTrack
+      </h1>
 
-      {/* Navigation Items */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `
-              flex items-center px-4 py-3 rounded-lg transition-all
-              ${isActive 
-                ? 'bg-indigo-50 text-indigo-600 font-medium' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }
-            `}
-          >
-            <span className="mr-3">{item.icon}</span>
-            {item.label}
-          </NavLink>
-        ))}
+      <nav className="space-y-4 text-[16px] font-medium">
+        <NavLink
+          to="/add-log"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-blue-100 transition ${
+              isActive ? "bg-blue-200 text-blue-800 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          <PlusCircle size={20} /> Add Log
+        </NavLink>
+
+        <NavLink
+          to="/show-logs"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-blue-100 transition ${
+              isActive ? "bg-blue-200 text-blue-800 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          <List size={20} /> Show Logs
+        </NavLink>
+
+        <NavLink
+          to="/analytics"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-blue-100 transition ${
+              isActive ? "bg-blue-200 text-blue-800 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          <BarChart3 size={20} /> Analytics
+        </NavLink>
       </nav>
-
-      {/* Footer/Logout */}
-      <div className="p-4 border-t border-gray-200">
-        <button className="flex items-center w-full px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-50">
-          <FiLogOut size={20} className="mr-3" />
-          Logout
-        </button>
-      </div>
     </div>
   );
-};
-
-export default Sidebar;
+}

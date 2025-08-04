@@ -1,45 +1,23 @@
+// App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Home from "./pages/Home";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
+import { BrowserRouter as Router } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import AddLog from "./components/AddLog";
-import ShowLog from "./components/ShowLog";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/home" element={<Home />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/add-log" element={<AddLog/>} />
-            <Route  path="/show-log" element={<ShowLog/>}/>
-            <Route />
-          </Routes>
-        </main>
-        <Footer />
+        <div className="flex-grow">
 
-        {/* Add ToastContainer here - should be at the end but before closing div */}
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          // theme="colored"
-        />
+   <AppRoutes/>
+        </div>
+        <Footer />
+        <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </Router>
   );
