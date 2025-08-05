@@ -1,127 +1,177 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.exc import IntegrityError
-from app.dbconnect import async_session
-from app.schemas import UserRegister, UserLogin, ForgotUser
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timedelta, timezone
+from app.schemas import UserRegister, UserLogin, Token
 from app.models import User
-from fastapi import Response, Request
-from fastapi.responses import JSONResponse
 from app.utils import (
     hash_password,
     verify_password,
     create_access_token,
-    decode_token,
     create_refresh_token,
+    verify_refresh_token,
 )
-
-from sqlalchemy import select
-
-
-router = APIRouter()
+from app.deps import get_current_user, get_db
+from app.dbconfig import settings
 
 
-async def get_db():
-    async with async_session() as session:
-        yield session
+
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.get("/")
-async def Hello():
-    return "Hello from get "
-
-
-@router.post("/register")
-async def register(user: UserRegister, db: async_session = Depends(get_db)):
-    stmt = select(User).where(User.email == user.email)
-    result = await db.execute(stmt)
-    existing_user = result.scalar_one_or_none()
-
-    if existing_user:
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(user: UserRegister, db: AsyncSession = Depends(get_db)):
+    # Check if user already exists
+    existing_user = await db.execute(select(User).where(User.email == user.email))
+    if existing_user.scalar_one_or_none():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists, please login.",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
 
-    new_user = User(
-        name=user.name, email=user.email, password=hash_password(user.password)
-    )
+    # Create new user
+    hashed_password = hash_password(user.password)
+    new_user = User(name=user.name, email=user.email, password=hashed_password)
 
-    try:
-        db.add(new_user)
-        await db.commit()
-        return {"msg": "User registered successfully"}
-    except Exception as e:
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create user.",
-        )
+    db.add(new_user)
+    await db.commit()
+    return {"message": "User created successfully"}
 
 
-@router.post("/login")
-async def login(user: UserLogin, db: async_session = Depends(get_db)):
-    stmt = select(User).where(User.email == user.email)
-    result = await db.execute(stmt)
+@router.post("/login", response_model=Token)
+async def login(
+    user: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
+):
+    # Verify user credentials
+    result = await db.execute(select(User).where(User.email == user.email))
     db_user = result.scalar_one_or_none()
 
-    if not db_user:
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found , please register",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
         )
-    if not verify_password(user.password, db_user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=" incorrect password"
-        )
-    access_token = create_access_token({"user_id": db_user.id})
-    refresh_token = create_refresh_token({"user_id": db_user.id})
+    expires = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    # Generate tokens
+    access_token = create_access_token(
+        {"user_id": db_user.id, "token_version": db_user.token_version}
+    )
+    refresh_token = create_refresh_token(
+        {"user_id": db_user.id, "token_version": db_user.token_version}
+    )
 
-    response = JSONResponse(content={"msg": "Login succcessful"})
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    print(access_token)
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
-    return response
+    # Update user with new refresh token
+    db_user.refresh_token = refresh_token
+    db_user.refresh_token_expires = datetime.now(timezone.utc) + timedelta(
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+    await db.commit()
+
+    # Set secure cookies
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        expires=expires,
+    )
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
 
 
-@router.post("/verify-token")
-async def verify_token(token: str):
-    payload = decode_token(token)
-    if payload:
-        return {"user_id": payload["user_id"]}
-    raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-
-@router.post("/refresh-token")
-async def refresh_token(request: Request, response: Response):
+@router.post("/refresh-token", response_model=Token)
+async def refresh_token(
+    request: Request, response: Response, db: AsyncSession = Depends(get_db)
+):
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
-        raise HTTPException(status_code=401, detail="you are unauthorised")
-
-    payload = decode_token(refresh_token)
-    if not payload:
         raise HTTPException(
-            status_code=401, detail="Session expired , you have to login"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token is missing"
         )
 
-    new_access_token = create_access_token({"user_id": payload["user_id"]})
-    response.set_cookie(key="access_token", value=new_access_token, httponly=True)
-    return {"message": "access_Token refreshed successfully"}
-
-
-@router.get("/get-user")
-async def get_current_user(request: Request):
-    login_token = request.cookies.get("access_token")
-    if not login_token:
-        raise HTTPException(status_code=401, detail="You must login")
     try:
-        payload = decode_token(login_token)
-        login_user = payload.get("user_id")
+        payload = verify_refresh_token(refresh_token)
+        user_id = payload.get("user_id")
+        token_version = payload.get("token_version")
 
-    except:
-        raise HTTPException(status_code=400, detail="not found")
-    return login_user
+        # Verify user and token version
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
 
-@router.post('/forgot-password')
-async def get_update_password(request:Request):
-    forgot_user= request.body(name:ForgotUSer)
+        if (
+            not user
+            or user.refresh_token != refresh_token
+            or user.token_version != token_version
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+            )
+
+        # Generate new tokens
+        new_access_token = create_access_token(
+            {"user_id": user.id, "token_version": user.token_version}
+        )
+       
+
+       
+
+        return {
+            "access_token": new_access_token,
+            "token_type": "bearer",
+        }
+
+    except HTTPException:
+        # Clear invalid tokens
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        raise
 
 
+@router.post("/logout")
+async def logout(
+    response: Response,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # Invalidate refresh token
+    result = await db.execute(select(User).where(User.id == current_user["user_id"]))
+    user = result.scalar_one_or_none()
+
+    if user:
+        user.refresh_token = None
+        user.refresh_token_expires = None
+        await db.commit()
+
+    # Clear cookies
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return {"message": "Successfully logged out"}
+
+
+@router.get("/me")
+async def get_me(
+    current_user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(User).where(User.id == current_user["user_id"]))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    return {"id": user.id, "name": user.name, "email": user.email}

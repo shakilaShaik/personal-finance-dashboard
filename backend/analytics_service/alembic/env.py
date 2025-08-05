@@ -25,12 +25,20 @@ target_metadata = None
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 from sqlalchemy import create_engine
 from app.models import Base
-from app.dbconfig import settings
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = settings.DB_URL.replace("asyncpg", "psycopg2")
+load_dotenv()
+
+DATABASE_URL = os.getenv("ALEMBIC_URL")
 
 engine = create_engine(DATABASE_URL)
 

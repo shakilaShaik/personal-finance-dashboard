@@ -1,17 +1,22 @@
 FROM python:3.10-slim
 
 WORKDIR /app
-
 ENV PYTHONPATH=/app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y netcat-openbsd build-essential libpq-dev && apt-get clean
+# System dependencies (added postgresql-client for proper health checks)
+RUN apt-get update && \
+    apt-get install -y \
+    netcat-openbsd \
+    build-essential \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python packages
+# Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your app
+# App code
 COPY ./app /app/app
 COPY ./alembic /app/alembic
 COPY alembic.ini .

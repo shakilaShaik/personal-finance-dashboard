@@ -1,27 +1,83 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   auth_service:
-    build: ./auth_service
+    build:
+      context: ./auth_service
     container_name: auth_service
     ports:
-      - "5000:5000"
-    env_file:
-      - .env
+      - "8002:8000"
+    environment:
+      - DB_URL=postgresql+asyncpg://auth_db:postgres@auth_db:5432/auth_db
+      - SYNC_DB_URL=postgresql+psycopg2://auth_db:postgres@auth_db:5432/auth_db
+      - SECRET_KEY=supersecretkey
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=auth_db
+      - POSTGRES_PASSWORD=postgres
     depends_on:
-      - postgres
+      auth_db:
+        condition: service_healthy
+    volumes:
+      - ./auth_service:/app
+    command: ["/app/entrypoint.sh"] # Use the dedicated script
 
+  auth_db:
+    image: postgres:16
+    container_name: auth_db
+    restart: always
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_db
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_db -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  analytics_service:
+    build:
+      context: ./analytics_service
+    container_name: analytics_service
+    ports:
+      - "8003:8000"
+    environment:
+      - DB_URL=postgresql+asyncpg://analytics_db:postgres@analytics_db:5432/analytics_db
+
+    depends_on:
+      - analytics_db
+    volumes:
+      - ./analytics_service:/app
+
+  analytics_db:
+    image: postgres:15
+    container_name: analytics_db
+    restart: always
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: analytics_db
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - analytics_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
+  pg_admin:
+    image: dpage/pgadmin4
+    container_name: pg_admin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - analytics_db
+      - auth_db
 volumes:
-  pgdata:
+  auth_pgdata:
+  analytics_pgdata:
