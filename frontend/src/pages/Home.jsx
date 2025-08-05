@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setLogin } from "../redux/userSlice";
 import { toast } from "react-toastify";
-import   authAxios  from '../api/interceptor'
 import { Link } from "react-router-dom";
 // import SideBar from '../components/SideBar'
+import authApi from '../api/authApi'
 
 const Home = () => {
   const { user } = useSelector((state) => state.user);
@@ -13,9 +13,9 @@ const Home = () => {
 
   const handleFetchUser = async () => {
     try {
-      console.log("the url is interceptor url", authAxios.baseURL);
+      console.log("the url is interceptor url", authApi.baseURL);
       
-      const res = await authAxios.get("/auth/me");
+      const res = await authApi.get("/auth/me");
 
 
       dispatch(setLogin(res.data));

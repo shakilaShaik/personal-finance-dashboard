@@ -3,12 +3,12 @@ import { PlusCircle, List, BarChart3 } from "lucide-react";
 
 export default function Sidebar() {
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-200 p-6 shadow-md ">
+    <div className="w-64  hidden min-h-screen bg-white border-r border-gray-200 p-6 shadow-md lg:block">
       <h1 className="text-2xl font-bold mb-10 text-gray-800 tracking-wide text-center">
-        📊 FinTrack
+         FinTrack
       </h1>
 
-      <nav className="space-y-4 text-[16px] font-medium">
+      <nav className="space-y-4 text-[16px] font-medium ">
         <NavLink
           to="/add-log"
           className={({ isActive }) =>

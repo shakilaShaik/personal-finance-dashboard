@@ -13,7 +13,7 @@ from app.utils import (
 )
 from app.deps import get_current_user, get_db
 from app.dbconfig import settings
-expires = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -50,7 +50,7 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
-
+    expires = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     # Generate tokens
     access_token = create_access_token(
         {"user_id": db_user.id, "token_version": db_user.token_version}
@@ -124,26 +124,9 @@ async def refresh_token(
         new_access_token = create_access_token(
             {"user_id": user.id, "token_version": user.token_version}
         )
-        new_refresh_token = create_refresh_token(
-            {"user_id": user.id, "token_version": user.token_version}
-        )
-
-        # Update user with new refresh token
-        user.refresh_token = new_refresh_token
-        user.refresh_token_expires = datetime.now(timezone.utc) + timedelta(
-            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-        )
-        await db.commit()
-
-        # Set new cookies
        
-        response.set_cookie(
-            key="refresh_token",
-            value=new_refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="lax",
-        )
+
+       
 
         return {
             "access_token": new_access_token,

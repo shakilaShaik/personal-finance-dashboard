@@ -10,7 +10,19 @@ const Navbar = () => {
   const navItems = [
     { name: "Home", path: "/home" },
     { name: "Sign In", path: "/signin" },
+    { name: "Sign Up", path: "/signup" },]
+
+  const mobilenavItems = [
+    { name: "Home", path: "/home" },
+    { name: "Sign In", path: "/signin" },
     { name: "Sign Up", path: "/signup" },
+        { name: "Add Log", path: "/add-log" },
+    { name: "Show Log", path: "/show-logs" },
+
+    { name: "Analytics", path: "/analytics" }
+
+    
+    
   ];
 
   const mobileToggleMenu = () => setIsMobileMenuOpen((prev) => !prev);
@@ -52,7 +64,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white px-4 pb-4">
           <ul className="space-y-2 text-gray-700 text-base font-medium">
-            {navItems.map(({ name, path }) => (
+            {mobilenavItems.map(({ name, path }) => (
               <li key={name}>
                 <Link
                   to={path}
