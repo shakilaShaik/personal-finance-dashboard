@@ -1,99 +1,168 @@
 import React, { useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { Dialog } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
+import { format } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import analyticsApi from "../api/analyticsApi";
+import {toast} from "react-toastify";
 
 const AddLog = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
-    food: 0,
-    travel: 0,
-    shopping: 0,
-    daily_needs: 0,
-    other: 0,
-    income: 0,
+    food: "",
+    travel: "",
+    shopping: "",
+    daily_needs: "",
+    other: "",
+    income: "",
   });
-
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: parseFloat(e.target.value) });
+    const { name, value } = e.target;
+    // Allow only numbers and decimals
+    if (/^-?\d*\.?\d*$/.test(value) || value === "") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    return Object.values(formData).every((val) => val !== "" && !isNaN(val));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // try {
-    //   await axios.post("http://localhost:8003/api/add-log", {
-    //     log_date: selectedDate.toISOString().split("T")[0],
-    //     ...formData,
-    //   }, { withCredentials: true });
+    if (!validateForm()) {
+      toast.error("Please fill in all fields with valid numbers.");
+      return;
+    }
 
-    //   alert("Log added successfully!");
-    //   closeModal();
-    // } catch (err) {
-    //   console.error(err);
-    //   alert("Error adding log.");
-    // }
+    setSubmitting(true);
+
+    const parsedData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [key, parseFloat(value)])
+    );
+
+    const data = {
+      ...parsedData,
+      log_date: format(selectedDate, "yyyy-MM-dd"),
+    };
+
+    try {
+      const response = await analyticsApi({
+        url: "/log",
+        method: "post",
+        data: data,
+      });
+
+      if (response?.data?.msg) {
+        toast.success(response.data.msg);
+      } else {
+        toast.success("Log saved successfully!");
+      }
+
+      // Reset form
+      setFormData({
+        food: "",
+        travel: "",
+        shopping: "",
+        daily_needs: "",
+        other: "",
+        income: "",
+      });
+    } catch (error) {
+      console.error("Error submitting log:", error);
+      const msg =
+        error.response?.data?.detail ||
+        error.response?.data?.msg ||
+        "Failed to save the log. Please try again.";
+      toast.error(`❌ ${msg}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Add Daily Log</h2>
+    <div className="flex flex-col lg:flex-row gap-8 justify-center items-start">
+      {/* Calendar */}
+      <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h2 className="text-lg font-semibold text-indigo-600 mb-4 text-center">
+          Select Log Date
+        </h2>
+        <DayPicker
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          className="text-gray-700"
+          modifiersClassNames={{
+            selected: "bg-indigo-600 text-white",
+            today: "border-indigo-500",
+          }}
+        />
+        <p className="text-sm text-gray-600 mt-2 text-center">
+          Selected Date:{" "}
+          <span className="font-medium text-indigo-700">
+            {format(selectedDate, "PPP")}
+          </span>
+        </p>
+      </div>
 
-      <Calendar
-        onChange={(date) => {
-          setSelectedDate(date);
-          openModal();
-        }}
-        value={selectedDate}
-        className="mx-auto border rounded-lg shadow-md p-4"
-      />
+      {/* Log Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full lg:w-[500px] bg-white p-8 rounded-2xl shadow-lg border border-gray-200"
+      >
+        <h2 className="text-xl font-bold text-indigo-700 mb-6 text-center">
+          Add Daily Log
+        </h2>
 
-      {/* Modal */}
-      <Dialog open={isOpen} onClose={closeModal} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <Dialog.Title className="text-xl font-bold">Log for {selectedDate.toDateString()}</Dialog.Title>
-              <button onClick={closeModal}>
-                <XMarkIcon className="h-5 w-5 text-gray-500" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {["food", "travel", "shopping", "daily_needs", "other", "income"].map((field) => (
-                <div key={field}>
-                  <label className="block capitalize text-sm mb-1">{field.replace("_", " ")}:</label>
-                  <input
-                    type="number"
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleChange}
-                    className="w-full border px-3 py-2 rounded-md"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              ))}
-
-              <button
-                type="submit"
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md"
-              >
-                Submit
-              </button>
-            </form>
-          </Dialog.Panel>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input label="Food" name="food" value={formData.food} onChange={handleChange} />
+          <Input label="Travel" name="travel" value={formData.travel} onChange={handleChange} />
+          <Input label="Shopping" name="shopping" value={formData.shopping} onChange={handleChange} />
+          <Input label="Daily Needs" name="daily_needs" value={formData.daily_needs} onChange={handleChange} />
+          <Input label="Other" name="other" value={formData.other} onChange={handleChange} />
+          <Input label="Income" name="income" value={formData.income} onChange={handleChange} />
         </div>
-      </Dialog>
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`w-full mt-6 ${
+            submitting ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+          } text-white font-semibold py-2 px-4 rounded-lg transition`}
+        >
+          {submitting ? "Saving..." : "Save Log"}
+        </button>
+      </form>
     </div>
   );
 };
+
+const Input = ({ label, name, value, onChange }) => (
+  <div className="flex flex-col">
+    <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+        ₹
+      </span>
+      <input
+        type="number"
+        step="0.01"
+        id={name}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="pl-7 border border-gray-300 rounded-md w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        placeholder={`Here expenditure ${label.toLowerCase()}`}
+      />
+    </div>
+  </div>
+);
 
 export default AddLog;

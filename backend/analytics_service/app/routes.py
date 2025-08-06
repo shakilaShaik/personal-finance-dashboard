@@ -27,6 +27,7 @@ async def create_daily_log(
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),  # ✅ use Depends here
 ):
+    
     user_id = current_user["user_id"]
 
     stmt = select(DailyLog).where(

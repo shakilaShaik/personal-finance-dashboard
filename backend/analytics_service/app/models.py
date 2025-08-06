@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, Numeric, Date, String
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
 from app.dbconnect import Base
 
 
