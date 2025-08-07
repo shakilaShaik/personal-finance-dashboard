@@ -82,6 +82,7 @@ const AddLog = () => {
       toast.error(`❌ ${msg}`);
     } finally {
       setSubmitting(false);
+      
     }
   };
 
@@ -95,7 +96,7 @@ const AddLog = () => {
         <DayPicker
           mode="single"
           selected={selectedDate}
-          onSelect={setSelectedDate}
+           onSelect={(date) => setSelectedDate(date || new Date())} // <-- THIS LINE
           className="text-gray-700"
           modifiersClassNames={{
             selected: "bg-indigo-600 text-white",

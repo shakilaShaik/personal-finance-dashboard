@@ -68,6 +68,30 @@ async def update_log(
         return {"msg": "updated your expenditure log"}
 
 
+@router.get("/all-logs")
+async def get_all_logs(
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user)):
+    
+    user_id = current_user["user_id"]
+    stmt = (
+        select(DailyLog)
+        .where(
+            DailyLog.user_id == user_id,
+        )
+        .order_by(DailyLog.log_date)
+    )
+    result = await db.execute(stmt)
+    logs = result.scalars().all()
+
+    return logs
+
+
+
+
+
+
+
 @router.get("/logs", response_model=List[DailyLogResponse])
 async def get_logs_between_dates(
     start_date: date = Query(..., description="Start date in YYYY-MM-DD"),
