@@ -9,7 +9,7 @@ const logSlice = createSlice({
 },
 
 
-    reducers: {
+    // reducers: {
 
 }
 )
