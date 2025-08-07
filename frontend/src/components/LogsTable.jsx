@@ -15,8 +15,13 @@ const LogsTable = ({ data }) => {
     []
   );
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({ columns, data });
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = useTable({ columns, data });
 
   return (
     <div className="overflow-x-auto w-full p-4">
@@ -25,27 +30,57 @@ const LogsTable = ({ data }) => {
         className="min-w-full divide-y divide-gray-200 shadow-md rounded-lg"
       >
         <thead className="bg-gray-100">
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()} className="text-left text-sm text-gray-700">
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps()} className="px-4 py-2">
-                  {column.render('Header')}
-                </th>
-              ))}
-            </tr>
-          ))}
+          {headerGroups.map(headerGroup => {
+            const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+            return (
+              <tr
+                key={key}
+                {...restHeaderGroupProps}
+                className="text-left text-sm text-gray-700"
+              >
+                {headerGroup.headers.map(column => {
+                  const { key, ...restColumnProps } = column.getHeaderProps();
+                  return (
+                    <th
+                      key={key}
+                      {...restColumnProps}
+                      className="px-4 py-2"
+                    >
+                      {column.render('Header')}
+                    </th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
 
-        <tbody {...getTableBodyProps()} className="bg-white divide-y divide-gray-200">
+        <tbody
+          {...getTableBodyProps()}
+          className="bg-white divide-y divide-gray-200"
+        >
           {rows.map(row => {
             prepareRow(row);
+            const { key, ...restRowProps } = row.getRowProps();
+
             return (
-              <tr {...row.getRowProps()} className="text-sm text-gray-800 hover:bg-gray-50">
-                {row.cells.map(cell => (
-                  <td {...cell.getCellProps()} className="px-4 py-2">
-                    {cell.render('Cell')}
-                  </td>
-                ))}
+              <tr
+                key={key}
+                {...restRowProps}
+                className="text-sm text-gray-800 hover:bg-gray-50"
+              >
+                {row.cells.map(cell => {
+                  const { key, ...restCellProps } = cell.getCellProps();
+                  return (
+                    <td
+                      key={key}
+                      {...restCellProps}
+                      className="px-4 py-2"
+                    >
+                      {cell.render('Cell')}
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}
