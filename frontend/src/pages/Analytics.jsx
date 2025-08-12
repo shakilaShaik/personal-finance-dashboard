@@ -1,56 +1,85 @@
 import React, { useEffect, useState } from 'react';
 import AnalyticsPieChart from '../components/AnalyticsPieChart';
-import analyticsApi from '../api/analyticsApi.js'
+import analyticsApi from '../api/analyticsApi.js';
+
 const Analytics = () => {
-  // const [summaryData, setSummaryData] = useState(null);
-  const  summaryData={
-  "message": "Here is your spending summary from 2025-08-03 to 2025-08-07",
-  "summary": {
-    "total_income": 2,
-    "max_income": 1,
-    "food": {
-      "total": 2,
-      "percentage": 200
-    },
-    "travel": {
-      "total": 2,
-      "percentage": 200
-    },
-    "shopping": {
-      "total": 2,
-      "percentage": 200
-    },
-    "daily_needs": {
-      "total": 2,
-      "percentage": 200
-    },
-    "other": {
-      "total": 2,
-      "percentage": 200
-    },
-    "total_spending": 10
-  }
-}
+  const [summaryData, setSummaryData] = useState(null);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
-  // useEffect(() => {
-  //   const fetchSummary = async () => {
-  //     try {
-  //       const response = await analyticsApi({
-  //         url:"/summary",
-  //         method:"post",
-  //       });
-  //       setSummaryData(response.data.summary);
-  //     } catch (error) {
-  //       console.error('Failed to fetch summary:', error);
-  //     }
-  //   };
+  useEffect(() => {
+    if (!fromDate || !toDate) return;
 
-  //   fetchSummary();
-  // }, []);
+    const fetchSummary = async () => {
+      try {
+        const response = await analyticsApi({
+          url: "/summary",
+          method: "get",
+          params: { start_date:fromDate,end_date: toDate }
+        });
+        setSummaryData(response.data.summary);
+      } catch (error) {
+        console.error('Failed to fetch summary:', error);
+      }
+    };
+
+    fetchSummary();
+  }, [fromDate, toDate]);
 
   return (
-    <div className="dashboard">
-      <AnalyticsPieChart summary={summaryData.summary} />
+    <div className="min-h-screen bg-gray-50 px-4 py-10 flex flex-col items-center">
+      <div className="max-w-3xl w-full bg-white shadow-lg rounded-2xl p-6">
+        <h1 className="text-2xl font-bold text-center mb-2 text-gray-800">
+          Expenditure Analytics
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Select a date range to view your spending breakdown
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          <div className="flex flex-col">
+            <label
+              htmlFor="fromDate"
+              className="mb-1 text-sm font-medium text-gray-700"
+            >
+              From Date
+            </label>
+            <input
+              id="fromDate"
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="toDate"
+              className="mb-1 text-sm font-medium text-gray-700"
+            >
+              To Date
+            </label>
+            <input
+              id="toDate"
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+        </div>
+
+        {summaryData ? (
+          <div className="mt-6">
+            <AnalyticsPieChart summary={summaryData} />
+          </div>
+        ) : (
+          <p className="text-center text-gray-400 italic">
+            No data yet — select both dates to see results
+          </p>
+        )}
+      </div>
     </div>
   );
 };
