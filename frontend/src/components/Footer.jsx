@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Logo and Summary */}
         <div>
-          <h1 className="text-2xl font-bold text-teal-600">FinTrack</h1>
+          <h1 className="text-2xl font-bold text-indigo-600">FinTrack</h1>
           <p className="mt-2 text-sm">
             Your smart assistant to manage daily expenses and track financial
             health.
@@ -20,17 +20,17 @@ const Footer = () => {
           <h2 className="font-semibold text-gray-800 mb-3">Quick Links</h2>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link to="/" className="hover:text-teal-500">
+              <Link to="/" className="hover:text-indigo-500">
                 Home
               </Link>
             </li>
             <li>
-              <Link to="/signin" className="hover:text-teal-500">
+              <Link to="/signin" className="hover:text-indigo-500">
                 Sign In
               </Link>
             </li>
             <li>
-              <Link to="/signup" className="hover:text-teal-500">
+              <Link to="/signup" className="hover:text-indigo-500">
                 Sign Up
               </Link>
             </li>
@@ -55,7 +55,7 @@ const Footer = () => {
               <Mail size={16} />
               <a
                 href="mailto:support@fintrack.com"
-                className="hover:text-teal-500"
+                className="hover:text-indigo-500"
               >
                 support@fintrack.com
               </a>
@@ -65,7 +65,7 @@ const Footer = () => {
               <a
                 href="https://github.com/your-org/fintrack"
                 target="_blank"
-                className="hover:text-teal-500"
+                className="hover:text-indigo-500"
               >
                 GitHub
               </a>
