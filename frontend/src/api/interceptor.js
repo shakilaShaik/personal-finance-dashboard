@@ -8,6 +8,7 @@ const onRefreshed = (newToken) => {
     refreshSubscribers.forEach((callback) => callback(newToken));
     refreshSubscribers = [];
 };
+const BASE_URL = import.meta.env.VITE_AUTH_BASE_URL
 
 const createAxiosInstance = (baseURL) => {
     const instance = axios.create({
@@ -44,7 +45,7 @@ const createAxiosInstance = (baseURL) => {
                     try {
                         // Always use AUTH service for refreshing token
                         const res = await axios.post(
-                            "http://localhost:8001/auth/refresh-token",
+                            "BASE_URL/auth/refresh-token",
                             {},
                             { withCredentials: true }
                         );
