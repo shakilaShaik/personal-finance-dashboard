@@ -140,21 +140,13 @@ async def refresh_token(
         raise
 
 
-@router.post("/logout")
+@router.get("/logout")
 async def logout(
     response: Response,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+   
+   
 ):
-    # Invalidate refresh token
-    result = await db.execute(select(User).where(User.id == current_user["user_id"]))
-    user = result.scalar_one_or_none()
-
-    if user:
-        user.refresh_token = None
-        user.refresh_token_expires = None
-        await db.commit()
-
+   
     # Clear cookies
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")

@@ -27,6 +27,7 @@ async def create_daily_log(
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),  # ✅ use Depends here
 ):
+    
     user_id = current_user["user_id"]
 
     stmt = select(DailyLog).where(
@@ -65,6 +66,72 @@ async def update_log(
         await db.commit()
         await db.refresh(exist_log)
         return {"msg": "updated your expenditure log"}
+
+
+@router.get("/all-logs")
+async def get_all_logs(
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user)):
+    
+    user_id = current_user["user_id"]
+    stmt = (
+        select(DailyLog)
+        .where(
+            DailyLog.user_id == user_id,
+        )
+        .order_by(DailyLog.log_date)
+    )
+    result = await db.execute(stmt)
+    logs = result.scalars().all()
+
+    return logs
+
+@router.get("/logged-dates")
+async def get_logged_dates(
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+
+    stmt = select(DailyLog.log_date).where(DailyLog.user_id == user_id)
+    result = await db.execute(stmt)
+    dates = [row[0] for row in result.all()]  # Convert SQLAlchemy result to list
+
+    return {"logged_dates": dates}
+
+
+@router.get("/log/{log_date}")
+async def get_log_by_date(
+    log_date: date,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+
+    stmt = select(DailyLog).where(
+        DailyLog.log_date == log_date,
+        DailyLog.user_id == user_id
+    )
+
+    log = (await db.execute(stmt)).scalar_one_or_none()
+
+    if not log:
+        raise HTTPException(status_code=404, detail="No log found for this date")
+
+    # If DailyLog is a SQLAlchemy ORM object, convert to dict
+    return {
+        "log_date": log.log_date.isoformat(),
+        "income": log.income,
+       
+        "food": log.food,
+        "travel":log.travel,
+        "shopping": log.shopping,
+        "daily_needs": log.daily_needs,
+        "other": log.other
+    }
+
+
+
 
 
 @router.get("/logs", response_model=List[DailyLogResponse])
@@ -138,15 +205,15 @@ async def get_spending_summary(
 
     # Loop and accumulate
     for log in logs:
-        food_total += log.food
-        travel_total += log.travel
-        shopping_total += log.shopping
-        daily_needs_total += log.daily_needs
-        other_total += log.other
-        total_income += log.income
+        food_total +=float( log.food)
+        travel_total += float(log.travel)
+        shopping_total += float(log.shopping)
+        daily_needs_total += float(log.daily_needs)
+        other_total += float(log.other)
+        total_income += float(log.income)
 
-        if log.income > max_income:
-            max_income = log.income
+        if float(log.income) > max_income:
+            max_income = float(log.income)
 
     if max_income == 0:
         raise HTTPException(

@@ -1,4 +1,5 @@
 import createAxiosInstance from "./interceptor.js"
-const analyticsApi = createAxiosInstance("http://localhost:8003");
+const analyticsBaseUrl = import.meta.env.VITE_ANALYTICS_BASE_URL
+const analyticsApi = createAxiosInstance(analyticsBaseUrl)
 export default analyticsApi
 

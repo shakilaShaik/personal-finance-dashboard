@@ -1,29 +1,47 @@
-export default function ShowLog() {
+import React, { useEffect, useState } from 'react';
+// import { useSelector } from 'react-redux';
+import ShowLogs from '../components/LogsTable'
+import analyticsApi from '../api/analyticsApi'
+import {toast} from 'react-toastify'
+import { useDispatch, useSelector } from 'react-redux';
+import { setLogs } from '../redux/logSlice';
+
+const ShowLog = () => {
+  const logs = useSelector(state => state.logs.logs); // Assuming you store it here
+  const dispatch=useDispatch()
+
+
+useEffect(() => {
+    const fetchingLogs = async () => {
+      try {
+        const result = await analyticsApi({
+          url: '/all-logs',
+          method: 'get',
+        });
+       let  logsFetched= result.data;
+        console.log(logs, 'the logs are');
+       dispatch(setLogs(logsFetched)); // set logs in Redux
+
+       
+        toast.success('Your logs are fetched');
+      } catch (error) {
+        toast.error('Failed to fetch logs');
+        console.error(error);
+      }
+    };
+
+    fetchingLogs();
+  }, []);
+useEffect(() => {
+  console.log(logs, 'Updated logs from Redux');
+}, [logs]);
+
   return (
-    <div>
-      <h2 className="text-3xl font-bold mb-6">Transaction Logs</h2>
-      <div className="bg-white/5 p-4 rounded-xl shadow-md w-full">
-        {/* Dummy Table */}
-        <table className="w-full text-left text-sm text-white">
-          <thead>
-            <tr className="border-b border-gray-600">
-              <th className="py-2">Title</th>
-              <th className="py-2">Amount</th>
-              <th className="py-2">Type</th>
-              <th className="py-2">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Map your logs here */}
-            <tr>
-              <td className="py-2">Salary</td>
-              <td className="py-2">₹50,000</td>
-              <td className="py-2 text-green-400">Income</td>
-              <td className="py-2">2025-07-29</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold my-4">Your Logs</h1>
+      <ShowLogs data={logs} />
     </div>
   );
-}
+};
+
+export default ShowLog;

@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { PlusCircle, List, BarChart3 } from "lucide-react";
+import { FcBullish } from "react-icons/fc";
 
 export default function Sidebar() {
   return (
     <div className="w-64  hidden min-h-screen bg-white border-r border-gray-200 p-6 shadow-md lg:block">
-      <h1 className="text-2xl font-bold mb-10 text-gray-800 tracking-wide text-center">
-         FinTrack
+      <h1 className="text-2xl font-bold mb-10 text-gray-800 tracking-wide text-center flex">
+        <FcBullish /> FinTrack
       </h1>
 
       <nav className="space-y-4 text-[16px] font-medium ">

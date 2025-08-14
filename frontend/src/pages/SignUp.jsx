@@ -12,7 +12,7 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const BASE_URL_SIGNUP = "http://localhost:8002";
+  const BASE_URL_SIGNUP = import.meta.env.VITE_AUTH_BASE_URL
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

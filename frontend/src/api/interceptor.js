@@ -44,7 +44,7 @@ const createAxiosInstance = (baseURL) => {
                     try {
                         // Always use AUTH service for refreshing token
                         const res = await axios.post(
-                            "http://localhost:8002/auth/refresh-token",
+                            "http://localhost:8001/auth/refresh-token",
                             {},
                             { withCredentials: true }
                         );
