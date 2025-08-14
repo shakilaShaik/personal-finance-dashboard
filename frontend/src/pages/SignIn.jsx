@@ -7,7 +7,7 @@ const Login = () => {
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const BASE_URL = "http://localhost:8002";
+  const BASE_URL = import.meta.env.VITE_AUTH_BASE_URL
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
