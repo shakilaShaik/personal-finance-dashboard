@@ -20,7 +20,7 @@ const Navbar = () => {
   const desktopNav = [
     { name: "Home", path: "/home" },
     { name: "Sign In", path: "/signin" },
-    { name: "Sign Up", path: "/signup" },
+    { name: "Logout", path: "/logout" },
   ];
 
   // Mobile Icon Nav Items
@@ -44,14 +44,14 @@ const Navbar = () => {
         
         {/* Brand for desktop */}
         <Link
-          to="/home"
+          to="/"
           className="text-2xl font-bold  hidden md:block"
         >
           FinTrack
         </Link>
 
         {/* Home icon for mobile */}
-        <Link to="/home" className="md:hidden text-indigo-600">
+        <Link to="/" className="md:hidden text-indigo-600">
           <Home size={28} />
         </Link>
 

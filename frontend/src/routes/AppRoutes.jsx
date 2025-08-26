@@ -18,7 +18,7 @@ const AppRoutes = () => {
 
       {/* Protected Routes with Sidebar Layout */}
       <Route
-        path="/home"
+        path="/"
         element={
           <ProtectedLayout>
             <Home />

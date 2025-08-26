@@ -80,7 +80,7 @@ const Home = () => {
               Sign In
             </Link>
 
-            <input type="date" name="date" className="bg-red-500" />
+            
           </div>
         </>
       )}
