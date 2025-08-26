@@ -29,7 +29,7 @@ const Login = () => {
       localStorage.setItem("access_token", res.data.access_token);
 
       toast.success("Login successful!"); // ✅ proper toast usage
-      navigate("/home"); // ✅ redirect after success (optional)
+      navigate("/"); // ✅ redirect after success (optional)
     } catch (err) {
       console.log(err);
       toast.error(
