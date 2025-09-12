@@ -18,7 +18,7 @@ const Navbar = () => {
 
   // Desktop Nav Items
   const desktopNav = [
-    { name: "Home", path: "/home" },
+    { name: "Home", path: "/" },
     { name: "Sign In", path: "/signin" },
     { name: "Logout", path: "/logout" },
   ];
