@@ -23,7 +23,7 @@ useEffect(() => {
        dispatch(setLogs(logsFetched)); // set logs in Redux
 
        
-        toast.success('Your logs are fetched');
+       
       } catch (error) {
         toast.error('Failed to fetch logs');
         console.error(error);

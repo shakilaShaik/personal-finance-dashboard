@@ -9,11 +9,11 @@ import authApi from '../api/authApi'
 const Home = () => {
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  console.log("the user from redux", user);
+
 
   const handleFetchUser = async () => {
     try {
-      console.log("the url is interceptor url", authApi.baseURL);
+    
       
       const res = await authApi.get("/auth/me");
 
