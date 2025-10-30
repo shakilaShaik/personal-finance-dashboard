@@ -20,7 +20,7 @@ const Navbar = () => {
   const desktopNav = [
     { name: "Home", path: "/" },
     { name: "Sign In", path: "/signin" },
-    { name: "Logout", path: "/logout" },
+   
   ];
 
   // Mobile Icon Nav Items
@@ -35,7 +35,7 @@ const Navbar = () => {
   const dropdownItems = [
     { name: "Sign In", path: "/signin", icon: <LogIn size={18} /> },
     { name: "Sign Up", path: "/signup", icon: <UserPlus size={18} /> },
-    { name: "Logout", path: "/logout", icon: <LogOut size={18} /> },
+   
   ];
 
   return (
